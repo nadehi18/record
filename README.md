@@ -1,12 +1,17 @@
 # record
 Record is a small program made in Python to record from the command line.
+It also opens a GUI window that allows the user to save the file and exit.
 
 Takes up to two arguments: the first is the folder to save the recording in, and the second is the length in minutes to record.  
 
 The file is saved with the date as the filename in the wav format.
 
+#Dependencies:
 
-To Do:
+    pyaudio
+    tkinter
+
+#To Do:
 
 - [ ] Reconfigure argument handling
 - [ ] Document code
