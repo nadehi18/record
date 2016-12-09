@@ -8,6 +8,6 @@ The file is saved with the date as the filename in the wav format.
 
 To Do:
 
-- [] Reconfigure argument handling
-- [] Document code
-- [] Add argument for different filename
+- [ ] Reconfigure argument handling
+- [ ] Document code
+- [ ] Add argument for different filename
