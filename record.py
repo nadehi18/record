@@ -5,6 +5,7 @@ from tkinter import *
 from time import sleep
 import sys
 import datetime
+import os
 
 class App():
 
@@ -87,29 +88,84 @@ class Record():
         wf.writeframes(b''.join(frames))
         wf.close()
         
+def read_args():
 
+    args = sys.argv
+
+    os = sys.platform
+    if "win32" in os:
+        filedivider = "\\"
+    else:
+        filedivider = "/"
+
+    current_dir = os.getcwd()
+
+    gui = true
+    filename = args[1]
+    save_directory = None
+    minutes = 0
+
+    args.del(0)
+    args.del(0)
+
+    for x in range(len(args)):
+
+         if args[x] == '-nogui':
+            gui = false
+       
+         elif args[x] == '-d':
+
+            if not args[x + 1].isdigit():
+                 save_directory = args[x + 1]
+            
+            else:
+                print("Error: expected a string but a integer was given.")
+
+         elif args[x] == '-m':
+
+            if args[x + 1].isdigit():
+                minutes = args[x + 1] * 60
+
+            else:
+                print("Error: expected a integer, but a string was given.")
+
+        
+         elif args[x] == '-s':
+
+            if args[x + 1].isdigit():
+                minutes = args[x + 1]
+
+            else:
+                print("Error: expected a integer, but a string was given.")
+
+    if not save_directory:
+        save_directory = current_dir + filedivider
+    
+    else:
+        if not filedivider in save_directory:
+            save_directory += filedivider
+
+
+    return(gui, filename, save_directory, minutes)
 
 if __name__ == '__main__':
+   
+    args = read_args()
 
-    multiprocessing.freeze_support()
-
-    #Handle arguments (needs to be redone)
-    if len(sys.argv) == 3:
-        save_dir = sys.argv[1]
-        minutes = sys.argv[2]
-    elif len(sys.argv) == 2:
-        save_dir = sys.argv[1]
-        minutes = 0
-    else:
-        save_dir = ""
-        minutes = 0
+    gui = args[0]
+    filename = args[1]
+    save_dir = args[2]
+    time = args[3]
 
     #Start the record subprocess
+    multiprocessing.freeze_support()
     record_queue = multiprocessing.Queue()
     record_process = multiprocessing.Process(target = Record, args=(record_queue, save_dir, minutes,))
     record_process.start()
 
-    #Start the main GUI
-    root = Tk()
-    app = App(root, record_queue, save_dir)
-    root.mainloop()
+    if gui == true:
+
+        #Start the main GUI
+        root = Tk()
+        app = App(root, record_queue, save_dir)
+        root.mainloop()
