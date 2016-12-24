@@ -56,7 +56,7 @@ class Record():
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
         RATE = 48000
-        RECORD_SECONDS = self.record_minutes * 60
+        RECORD_SECONDS = self.record_minutes
         WAVE_OUTPUT_FILENAME = self.output_file
 
         p = pyaudio.PyAudio()
@@ -92,26 +92,26 @@ def read_args():
 
     args = sys.argv
 
-    os = sys.platform
-    if "win32" in os:
+    ostype = sys.platform
+    if "win32" in ostype:
         filedivider = "\\"
     else:
         filedivider = "/"
 
     current_dir = os.getcwd()
 
-    gui = true
+    gui = True
     filename = args[1]
     save_directory = None
     minutes = 0
 
-    args.del(0)
-    args.del(0)
+    args.pop(0)
+    args.pop(0)
 
     for x in range(len(args)):
 
          if args[x] == '-nogui':
-            gui = false
+            gui = False
        
          elif args[x] == '-d':
 
@@ -145,13 +145,14 @@ def read_args():
         if not filedivider in save_directory:
             save_directory += filedivider
 
-
+    print('Done')
     return(gui, filename, save_directory, minutes)
 
 if __name__ == '__main__':
-   
+  
+    print('1')
     args = read_args()
-
+    print('2')
     gui = args[0]
     filename = args[1]
     save_dir = args[2]
@@ -160,10 +161,10 @@ if __name__ == '__main__':
     #Start the record subprocess
     multiprocessing.freeze_support()
     record_queue = multiprocessing.Queue()
-    record_process = multiprocessing.Process(target = Record, args=(record_queue, save_dir, minutes,))
+    record_process = multiprocessing.Process(target = Record, args=(record_queue, save_dir, time,))
     record_process.start()
 
-    if gui == true:
+    if gui == True:
 
         #Start the main GUI
         root = Tk()
