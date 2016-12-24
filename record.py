@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pyaudio
 import wave
 import multiprocessing
@@ -6,17 +8,17 @@ from time import sleep
 import sys
 import datetime
 import os
+import argparse
 
 class App():
 
-    def __init__(self, master, queue, save_dir):
+    def __init__(self, master, queue, save_file):
 
         
         frame = Frame(master)
 
-        self.output_file = date = str(datetime.datetime.now()).split()[0] 
         self.text = StringVar() 
-        self.text2 = "Output file: " + save_dir + self.output_file + '.wav'
+        self.text2 = "Output file: " + save_file
         self.record_queue = queue
 
         self.textbox = Label(master, textvariable=self.text).pack()
@@ -38,16 +40,17 @@ class App():
         self.button2.pack()
         self.text.set("Status: Done")
 
+    def __exit__(self):
+        self.record_queue.put(True)
+
+
+
 class Record():
 
-    def __init__(self, queue, output_dir, minutes):
+    def __init__(self, queue, output_file, time):
 
-        date = str(datetime.datetime.now()).split()[0]
-        self.output_file = output_dir + date  + '.wav'
-        if minutes > 0:
-            self.record_minutes = minutes
-        else:
-            self.record_minutes = 110
+        self.output_file = output_file
+        self.time = time
         record = self.record(queue)
 
     def record(self, queue):
@@ -56,7 +59,7 @@ class Record():
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
         RATE = 48000
-        RECORD_SECONDS = self.record_minutes
+        RECORD_SECONDS = self.time
         WAVE_OUTPUT_FILENAME = self.output_file
 
         p = pyaudio.PyAudio()
@@ -87,10 +90,11 @@ class Record():
         wf.setframerate(RATE)
         wf.writeframes(b''.join(frames))
         wf.close()
+        exit()
         
 def read_args():
 
-    args = sys.argv
+    parser = argparse.ArgumentParser()
 
     ostype = sys.platform
     if "win32" in ostype:
@@ -101,72 +105,70 @@ def read_args():
     current_dir = os.getcwd()
 
     gui = True
-    filename = args[1]
-    save_directory = None
-    minutes = 0
+    filename = None
+    save_directory = current_dir 
+    seconds = 60
 
-    args.pop(0)
-    args.pop(0)
+    parser.add_argument("FILENAME", help="The name of the file")
+    parser.add_argument("-n", "--nogui", help="Runs the program without opening the GUI", action="store_true")
+    parser.add_argument("-u", "--usedate", help="Adds the date to the filename", action="store_true")
+    parser.add_argument("-d", "--directory", help="Directory to save the file in")
+    parser.add_argument("-m", "--minutes", help="Length of time to record in minutes", type=int)
+    parser.add_argument("-s", "--seconds", help="Length of time to record in seconds", type=int)
 
-    for x in range(len(args)):
+    args = parser.parse_args()
 
-         if args[x] == '-nogui':
-            gui = False
-       
-         elif args[x] == '-d':
-
-            if not args[x + 1].isdigit():
-                 save_directory = args[x + 1]
-            
-            else:
-                print("Error: expected a string but a integer was given.")
-
-         elif args[x] == '-m':
-
-            if args[x + 1].isdigit():
-                minutes = args[x + 1] * 60
-
-            else:
-                print("Error: expected a integer, but a string was given.")
-
-        
-         elif args[x] == '-s':
-
-            if args[x + 1].isdigit():
-                minutes = args[x + 1]
-
-            else:
-                print("Error: expected a integer, but a string was given.")
-
-    if not save_directory:
-        save_directory = current_dir + filedivider
-    
+    filename = args.FILENAME
+    if args.nogui:
+        gui = False
+    if args.usedate:
+        filename += str(datetime.datetime.now()).split()[0]
+    if args.directory:
+        save_directory = args.directory
+    if args.minutes:
+        seconds = args.minutes * 60
+    if args.seconds:
+        seconds = args.seconds
+   
+    if not "." in filename:
+        filename += ".wav"
     else:
-        if not filedivider in save_directory:
-            save_directory += filedivider
+        split_name = filename.split(".")
+        if not split_name[-1] == "wav":
+           
+            if filename[-1] == ".":
+                filename += "wav"
+            else:
+                filename += ".wav"
 
-    print('Done')
-    return(gui, filename, save_directory, minutes)
+    if save_directory[-1] != filedivider:
+        save_directory += filedivider
+
+    save_file = save_directory + filename
+    
+    if os.path.isfile(save_file):
+        print("Error: file exists.")
+        exit()
+
+
+    return(gui, save_file, seconds)
 
 if __name__ == '__main__':
   
-    print('1')
     args = read_args()
-    print('2')
     gui = args[0]
-    filename = args[1]
-    save_dir = args[2]
-    time = args[3]
+    save_file = args[1]
+    time = args[2]
 
     #Start the record subprocess
     multiprocessing.freeze_support()
     record_queue = multiprocessing.Queue()
-    record_process = multiprocessing.Process(target = Record, args=(record_queue, save_dir, time,))
+    record_process = multiprocessing.Process(target = Record, args=(record_queue, save_file, time,))
     record_process.start()
 
     if gui == True:
 
         #Start the main GUI
         root = Tk()
-        app = App(root, record_queue, save_dir)
+        app = App(root, record_queue, save_file)
         root.mainloop()
