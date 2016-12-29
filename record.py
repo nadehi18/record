@@ -23,6 +23,7 @@ class App():
         self.record_queue = queue
         self.recording_process = recording_process
         self.master = master
+        self.done = False
 
         self.textbox = Label(master, textvariable=self.text).pack()
         self.textbox2 = Label(master, text=self.text2)
@@ -46,6 +47,7 @@ class App():
 
         self.button2.pack()
         self.text.set("Status: Done")
+        self.done = True
 
     def __exit__(self):
         self.record_queue.put(True)
@@ -53,14 +55,11 @@ class App():
     def check_record(self):
 
         # Check if the recording subprocess is still alive.
-        # if it is check again in a second, if not then exit the GUI
-        if not self.recording_process.is_alive():
+        # if it is check again in a second, if not and it was not closed via GUI then exit the GUI
+        if not self.recording_process.is_alive() and not self.done:
             sys.exit()
         else:
             self.master.after(1000, self.check_record)
-
-
-
 
 
 
