@@ -12,15 +12,16 @@ import argparse
 
 class App():
 
-    def __init__(self, master, queue, save_file, recording_subprocess):
+    def __init__(self, master, queue, save_file, recording_process):
 
         
+        # Init stuff
         frame = Frame(master)
 
         self.text = StringVar() 
         self.text2 = "Output file: " + save_file
         self.record_queue = queue
-        self.recording_subprocess = recording_subprocess
+        self.recording_process = recording_process
         self.master = master
 
         self.textbox = Label(master, textvariable=self.text).pack()
@@ -35,6 +36,8 @@ class App():
 
 
     def finish_record(self):
+
+        # Puts something into the queue to tell the record process to stop
         self.record_queue.put(True)
 
         self.text.set("Status: Saving")
@@ -49,7 +52,9 @@ class App():
 
     def check_record(self):
 
-        if not self.recording_subprocess.is_alive():
+        # Check if the recording subprocess is still alive.
+        # if it is check again in a second, if not then exit the GUI
+        if not self.recording_process.is_alive():
             sys.exit()
         else:
             self.master.after(1000, self.check_record)
@@ -63,11 +68,14 @@ class Record():
 
     def __init__(self, queue, output_file, time):
 
+        # Init stuff
         self.output_file = output_file
         self.time = time
-        record = self.record(queue) 
+        record = self.record(queue)
+
     def record(self, queue):
 
+        # Most of this code was taken from the pyaudio example.
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
@@ -107,8 +115,10 @@ class Record():
         
 def read_args():
 
+    # Initialize the parser
     parser = argparse.ArgumentParser()
 
+    # Change the filedivider based on the OS
     ostype = sys.platform
     if "win32" in ostype:
         filedivider = "\\"
@@ -117,11 +127,13 @@ def read_args():
 
     current_dir = os.getcwd()
 
+    # Set default values
     gui = True
     filename = None
     save_directory = current_dir 
     seconds = 60
 
+    # Add all the arguments
     parser.add_argument("FILENAME", help="The name of the file")
     parser.add_argument("-n", "--nogui", help="Runs the program without opening the GUI", action="store_true")
     parser.add_argument("-u", "--usedate", help="Adds the date to the filename", action="store_true")
@@ -131,6 +143,7 @@ def read_args():
 
     args = parser.parse_args()
 
+    # Set all the variables to the arguments if given
     filename = args.FILENAME
     if args.nogui:
         gui = False
@@ -143,6 +156,7 @@ def read_args():
     if args.seconds:
         seconds = args.seconds
    
+    # Append the file extension to the filename if not already present
     if not "." in filename:
         filename += ".wav"
     else:
@@ -154,6 +168,7 @@ def read_args():
             else:
                 filename += ".wav"
 
+    # Make sure the filedivider is on the end of the path to save
     if save_directory[-1] != filedivider:
         save_directory += filedivider
 
@@ -168,12 +183,13 @@ def read_args():
 
 if __name__ == '__main__':
   
+    # Get values from argument parser
     args = read_args()
     gui = args[0]
     save_file = args[1]
     time = args[2]
 
-    #Start the record subprocess
+    #Start the record process
     multiprocessing.freeze_support()
     record_queue = multiprocessing.Queue()
     record_process = multiprocessing.Process(target = Record, args=(record_queue, save_file, time,))
