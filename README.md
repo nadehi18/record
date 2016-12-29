@@ -32,6 +32,6 @@ It also opens a GUI window that allows the user to save the file and exit.
 
 #To Do:
 
-- [ x ] Reconfigure argument handling
-- [ x ] Document code
+- [x] Reconfigure argument handling
+- [x] Document code
 - [ ] Add more arguments and options
