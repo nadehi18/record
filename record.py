@@ -12,7 +12,7 @@ import argparse
 
 class App():
 
-    def __init__(self, master, queue, save_file):
+    def __init__(self, master, queue, save_file, recording_subprocess):
 
         
         frame = Frame(master)
@@ -20,6 +20,8 @@ class App():
         self.text = StringVar() 
         self.text2 = "Output file: " + save_file
         self.record_queue = queue
+        self.recording_subprocess = recording_subprocess
+        self.master = master
 
         self.textbox = Label(master, textvariable=self.text).pack()
         self.textbox2 = Label(master, text=self.text2)
@@ -29,6 +31,8 @@ class App():
         frame.pack()
         
         self.text.set("Status: Recording")
+        self.master.after(1000, self.check_record)
+
 
     def finish_record(self):
         self.record_queue.put(True)
@@ -43,6 +47,16 @@ class App():
     def __exit__(self):
         self.record_queue.put(True)
 
+    def check_record(self):
+
+        if not self.recording_subprocess.is_alive():
+            sys.exit()
+        else:
+            self.master.after(1000, self.check_record)
+
+
+
+
 
 
 class Record():
@@ -51,8 +65,7 @@ class Record():
 
         self.output_file = output_file
         self.time = time
-        record = self.record(queue)
-
+        record = self.record(queue) 
     def record(self, queue):
 
         CHUNK = 1024
@@ -90,7 +103,7 @@ class Record():
         wf.setframerate(RATE)
         wf.writeframes(b''.join(frames))
         wf.close()
-        exit()
+        sys.exit()
         
 def read_args():
 
@@ -170,5 +183,5 @@ if __name__ == '__main__':
 
         #Start the main GUI
         root = Tk()
-        app = App(root, record_queue, save_file)
+        app = App(root, record_queue, save_file, record_process)
         root.mainloop()
