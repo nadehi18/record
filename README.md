@@ -2,17 +2,35 @@
 Record is a small program made in Python to record from the command line.
 It also opens a GUI window that allows the user to save the file and exit.
 
-Takes up to two arguments: the first is the folder to save the recording in, and the second is the length in minutes to record.  
 
-The file is saved with the date as the filename in the wav format.
+    usage: record.py [-h] [-n] [-u] [-d DIRECTORY] [-m MINUTES] [-s SECONDS]
+                     FILENAME
+
+    positional arguments:
+      FILENAME              The name of the file
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -n, --nogui           Runs the program without opening the GUI
+      -u, --usedate         Adds the date to the filename
+      -d DIRECTORY, --directory DIRECTORY
+                            Directory to save the file in
+      -m MINUTES, --minutes MINUTES
+                            Length of time to record in minutes
+      -s SECONDS, --seconds SECONDS
+                            Length of time to record in seconds
+
+
+
+
 
 #Dependencies:
 
-    pyaudio
-    tkinter
+**pyaudio**
+**tkinter**
 
 #To Do:
 
-- [ ] Reconfigure argument handling
-- [ ] Document code
-- [ ] Add argument for different filename
+- [ x ] Reconfigure argument handling
+- [ x ] Document code
+- [ ] Add more arguments and options
