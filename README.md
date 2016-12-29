@@ -1,6 +1,6 @@
 # record
 Record is a small program made in Python to record from the command line.
-It also opens a GUI window that allows the user to save the file and exit.
+It also optionally opens a GUI window that allows the user to save the file and exit.
 
 
     usage: record.py [-h] [-n] [-u] [-d DIRECTORY] [-m MINUTES] [-s SECONDS]
