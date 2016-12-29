@@ -27,6 +27,7 @@ It also opens a GUI window that allows the user to save the file and exit.
 #Dependencies:
 
 **pyaudio**
+
 **tkinter**
 
 #To Do:
