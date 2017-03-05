@@ -18,6 +18,8 @@ class App():
         # Init stuff
         frame = Frame(master)
 
+        master.protocol("WM_DELETE_WINDOW", self.exit)
+
         self.text = StringVar() 
         self.text2 = "Output file: " + save_file
         self.record_queue = queue
@@ -49,7 +51,7 @@ class App():
         self.text.set("Status: Done")
         self.done = True
 
-    def __exit__(self):
+    def exit(self):
         self.record_queue.put(True)
 
     def check_record(self):
