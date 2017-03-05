@@ -142,8 +142,10 @@ def read_args():
     parser.add_argument("-m", "--minutes", help="Length of time to record in minutes", type=int)
     parser.add_argument("-s", "--seconds", help="Length of time to record in seconds", type=int)
 
-    # On windows change this to args, unknown = parser.parse_known_args()
-    args = parser.parse_args()
+    if os.name == "nt":
+        args, unknown = parser.parse_known_args()
+    else:
+        args = parser.parse_args()
 
     # Set all the variables to the arguments if given
     filename = args.FILENAME
