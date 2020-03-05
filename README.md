@@ -1,4 +1,7 @@
 # record
+
+<img width=100px src="https://raw.githubusercontent.com/nadehi18/social-templates/master/codecard-python.png">
+
 Record is a small program made in Python to record from the command line.
 It also optionally opens a GUI window that allows the user to save the file and exit.
 
